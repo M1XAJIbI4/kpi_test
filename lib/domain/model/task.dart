@@ -12,8 +12,8 @@ class Task {
   });
 
   Task.fromMap(Map<String, dynamic> map) : 
-    name = map['name'] ?? '',
-    indicatorToMoId = map[''] ?? '',
-    parentId = '',
-    order = 1;
+    name = map['name'].toString(),
+    indicatorToMoId = map['indicator_to_mo_id'].toString(),
+    parentId = map['parent_id'].toString(),
+    order = map['order'];
 }

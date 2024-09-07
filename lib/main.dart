@@ -3,10 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:kpi_test/injection.dart';
+import 'package:kpi_test/presentation/application.dart';
 
 void main() async {
   await configureDependencies();
-  runApp(const MyApp());
+  runApp(const Application());
 }
 
 class MyApp extends StatelessWidget {
