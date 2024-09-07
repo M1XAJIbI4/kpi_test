@@ -1,8 +1,14 @@
+import 'dart:math';
+
+import 'package:appflowy_board/appflowy_board.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kpi_test/domain/bloc/task_list_cubit/task_list_cubit.dart';
 import 'package:kpi_test/domain/model/task.dart';
+import 'package:kpi_test/presentation/home_screen/task_item.dart';
+
+part 'empty_tasks_widget.dart';
+part 'kanban_board.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,55 +30,28 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('KPI TEST'),
+      ),
       body: SafeArea(
-        child: BlocBuilder<TaskListCubit, List<Task>>(
+        child: BlocBuilder<TaskListCubit, TaskListState>(
           bloc: _taskListCubit,
-          builder: (ctx, tasks) {
+          builder: (ctx, taskListState) {
             return AnimatedSwitcher(
               duration: kThemeAnimationDuration,
-              child: tasks.isEmpty 
+              child: taskListState.isEmpty
                   ? const _EmptyTasksWidget()
                   : Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-                      child: ListView.builder(
-                        itemCount: tasks.length,
-                        itemBuilder: (_, index) {
-                          final taskItem = tasks[index];
-                          return Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Colors.amber.withOpacity(0.25),
-                                borderRadius: const BorderRadius.all(Radius.circular(10))
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(taskItem.name),
-                                  Text(taskItem.parentId.toString()),
-                                  Text(taskItem.indicatorToMoId),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                      child: _KanbanBoardWidget(
+                        allTasksMap: taskListState.allTasksMap,
+                        sortedTasks: taskListState.configuredTaskMap,
+                      )
                     ),
             );
           },
         )
       ),
-    );
-  }
-}
-
-class _EmptyTasksWidget extends StatelessWidget {
-  const _EmptyTasksWidget();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('No tasks'),
     );
   }
 }

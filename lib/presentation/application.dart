@@ -15,10 +15,22 @@ class _ApplicationState extends State<Application> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'KPI Test',
+      theme: ApplicationTheme.theme,
       home: BlocProvider<TaskListCubit>(
         create: (ctx) => getIt.get<TaskListCubit>(),
         child: const HomeScreen(),
       ),
     );
   }
+}
+
+class ApplicationTheme {
+  static final theme = ThemeData(
+    // canvasColor: Colors.black,
+    cardColor: Colors.black45,
+    colorScheme: const ColorScheme.dark(
+      background: Colors.black87
+    )
+  );
 }

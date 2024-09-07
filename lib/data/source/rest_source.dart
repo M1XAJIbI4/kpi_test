@@ -11,7 +11,7 @@ class RestSource {
             'https://development.kpi-drive.ru/_api/indicators/get_mo_indicators'),
         body: {
           'period_start': '2024-06-01',
-          'period_end': '2024-06-30',
+          'period_end': '2024-09-30',
           'period_key': 'month',
           'requested_mo_id': '478',
           'behaviour_key': 'task,kpi_task',
