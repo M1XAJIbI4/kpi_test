@@ -133,16 +133,12 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
           return AppFlowyGroupCard(
             decoration: const BoxDecoration(
               color: Colors.transparent,
+              borderRadius: BorderRadius.all(Radius.circular(6.0))
             ),
             boxConstraints: const BoxConstraints(minWidth: 200),
             key: ValueKey(groupItem.id),
             child: task != null
-                ? GestureDetector(
-                    onTap: () {
-                      print('FOOBAR on task tap - ${task.parentId} ${task.indicatorToMoId}');
-                    },
-                    child: TaskItem(task: task),
-                  )
+                ? TaskItem(task: task)
                 : Text(textItem.index.toString()),
           );
         },

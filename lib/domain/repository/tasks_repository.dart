@@ -8,4 +8,8 @@ abstract interface class TasksRepository {
     required String taskId,
     required int order,
   });
+
+  void close();
+
+  Stream<Task>? getTaskStreamById(String taskId);
 } 

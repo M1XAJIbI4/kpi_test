@@ -1,3 +1,4 @@
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:kpi_test/domain/model/task.dart';
@@ -26,8 +27,6 @@ class TaskListCubit extends Cubit<TaskListState> {
     }
   }
 
-  bool isUpdating = false;
-
   Future<void> updateTask({
     required String taskId,
     required String parentId,
@@ -35,17 +34,17 @@ class TaskListCubit extends Cubit<TaskListState> {
   }) async {
     final currentState = state as TaskListStateReady;
     try {
-      final oldTask = _allTaskMap[taskId];      
+      final oldTask = _allTaskMap[taskId];
       if (oldTask?.parentId != parentId || oldTask?.order != newOrder) {
         emit(TaskListStateLoading());
         await _tasksRepository.updateTask(
-          parentId: parentId,
-          order: newOrder,
-          taskId: taskId
-        );
+            parentId: parentId, order: newOrder, taskId: taskId);
         emit(currentState);
+        EasyDebounce.debounce('debounce', const Duration(seconds: 2), () {
+          _tasksRepository.getTasks();
+        });
+        _tasksRepository.getTasks();
       }
-
     } catch (e, st) {
       emit(TaskListStateError());
       Future.delayed(const Duration(seconds: 2)).then((_) => _initialize());
@@ -74,8 +73,14 @@ class TaskListCubit extends Cubit<TaskListState> {
 
     _allTaskMap = {...taskMap};
     return TaskListStateReady(
-      allTasksMap: {...taskMap}, 
+      allTasksMap: {...taskMap},
       configuredTaskMap: {...configuredTaskMap},
     );
+  }
+
+  @override
+  Future<void> close() {
+    EasyDebounce.cancel('debounce');
+    return super.close();
   }
 }
