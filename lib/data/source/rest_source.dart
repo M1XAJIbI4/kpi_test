@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:kpi_test/logger.dart';
 
 @LazySingleton()
 class RestSource {
@@ -47,8 +48,6 @@ class RestSource {
     final dio = Dio();
     dio.options.headers["Content-Type"] = "multipart/form-data";
 
-    print("FOOBAR FOOBAR $parentId $order $taskId");
-
     final data = FormData.fromMap({
       'period_start': '2024-09-01',
       'period_end': '2024-09-30',
@@ -70,9 +69,7 @@ class RestSource {
       'https://development.kpi-drive.ru/_api/indicators/save_indicator_instance_field',
       data: data,
       options: Options(headers: _authHeader),
-      onSendProgress: (x, z) => print('FOOBAR onSend - $x $z')
     );
-
-    print('FOOBAR resp - ${response.data} $parentId $order $taskId');
+    logger.d('resp - ${response.data} $parentId $order $taskId');
   }
 }

@@ -1,14 +1,18 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:kpi_test/domain/model/task.dart';
 import 'package:kpi_test/domain/repository/tasks_repository.dart';
+import 'package:kpi_test/logger.dart';
+
+part 'task_list_state.dart';
 
 @injectable
 class TaskListCubit extends Cubit<TaskListState> {
   final TasksRepository _tasksRepository;
 
-  TaskListCubit(this._tasksRepository) : super(TaskListState.empty()) {
+  var _allTaskMap = <String, Task>{};
+
+  TaskListCubit(this._tasksRepository) : super(TaskListStateReady.empty()) {
     _initialize();
   }
 
@@ -18,7 +22,7 @@ class TaskListCubit extends Cubit<TaskListState> {
       final state = _configureState([...tasks]);
       emit(state);
     } catch (e, st) {
-      debugPrint('ERROR - $e, \n ST $st');
+      logger.e('ERROR - $e, \n ST $st');
     }
   }
 
@@ -29,19 +33,23 @@ class TaskListCubit extends Cubit<TaskListState> {
     required String parentId,
     required int newOrder,
   }) async {
+    final currentState = state as TaskListStateReady;
     try {
-      final oldTask = state.allTasksMap[taskId];
+      final oldTask = _allTaskMap[taskId];      
       if (oldTask?.parentId != parentId || oldTask?.order != newOrder) {
+        emit(TaskListStateLoading());
         await _tasksRepository.updateTask(
           parentId: parentId,
           order: newOrder,
           taskId: taskId
         );
-        await _initialize();
+        emit(currentState);
       }
+
     } catch (e, st) {
       Future.delayed(const Duration(seconds: 2)).then((_) => _initialize());
-      debugPrint('ERROR - $e, \n ST $st');
+      logger.e('ERROR - $e, \n ST $st');
+      emit(currentState);
     }
   }
 
@@ -63,23 +71,10 @@ class TaskListCubit extends Cubit<TaskListState> {
       value.sort((a, b) => a.order.compareTo(b.order));
     }
 
-    return TaskListState(
-        allTasksMap: {...taskMap}, configuredTaskMap: {...configuredTaskMap});
+    _allTaskMap = {...taskMap};
+    return TaskListStateReady(
+      allTasksMap: {...taskMap}, 
+      configuredTaskMap: {...configuredTaskMap},
+    );
   }
-}
-
-class TaskListState {
-  final Map<String, Task> allTasksMap;
-  final Map<String, List<Task>> configuredTaskMap;
-
-  TaskListState({
-    required this.allTasksMap,
-    required this.configuredTaskMap,
-  });
-
-  TaskListState.empty()
-      : allTasksMap = {},
-        configuredTaskMap = {};
-
-  bool get isEmpty => allTasksMap.isEmpty;
 }

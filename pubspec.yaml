@@ -15,6 +15,7 @@ dependencies:
   appflowy_board: ^0.1.2
   http: ^1.2.2
   get_it: ^7.7.0
+  logger: ^2.4.0
   flutter_bloc: ^8.1.6
   injectable: ^2.4.2
   build_runner: ^2.4.9

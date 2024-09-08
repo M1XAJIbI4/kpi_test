@@ -14,7 +14,7 @@ class _KanbanBoardWidget extends StatefulWidget {
 }
 
 class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
-  late final AppFlowyBoardController boadController;
+  late final AppFlowyBoardController boardController;
 
   late AppFlowyBoardScrollController boardScrollController;
   late final TaskListCubit _taskListCubit;
@@ -24,7 +24,7 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
   @override
   void initState() {
     _taskListCubit =  context.read<TaskListCubit>();
-    boadController = AppFlowyBoardController(
+    boardController = AppFlowyBoardController(
       onMoveGroupItem: _onMoveGroupItem,
       onMoveGroup: _onMoveGroup,
       onMoveGroupItemToGroup:_onMoveGroupItemToGroup,
@@ -36,8 +36,8 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
   }
 
   void _onMoveGroupItem(String groupKey, int fromIndex, int toIndex) {
-    print('on move group item - $groupKey $fromIndex $toIndex');
-    final task = _getTaskFromGroupByIndex(groupKey, fromIndex);
+    final task = _findTask(groupKey, toIndex);
+    logger.d('TASK - ${task?.name} $toIndex $groupKey');
     if (task != null) {
       _taskListCubit.updateTask(
         taskId: task.indicatorToMoId, 
@@ -47,20 +47,11 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
     }
   }
 
-  Task? _getTaskFromGroupByIndex(String key, int index) {
-    try {
-      final groupTasks = widget.sortedTasks[key] ?? [];
-      final result = groupTasks[index];
-      return result;
-    } catch (_) {}
-    return null;
-  } 
-
   void _onMoveGroup(String gr1, int from, String gr2, int to ) {}
 
   void _onMoveGroupItemToGroup(String grFrom, int indexFrom, String grTo, int indexTo) {
-    final task = _getTaskFromGroupByIndex(grFrom, indexFrom);
-    print('$grFrom $indexFrom $grTo $indexTo');
+    final task = _findTask(grTo, indexTo);
+    logger.d('TASK - ${task?.name} $indexTo $grTo');
     if (task != null) {
       _taskListCubit.updateTask(
         taskId: task.indicatorToMoId, 
@@ -68,6 +59,14 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
         newOrder: indexTo + 1,
       );
     }
+  }
+
+  Task? _findTask(String groupKey, int index) {
+    final items = boardController.groupDatas.firstWhere((e) => e.id == groupKey).items;
+    final item = items[index] as TaskTextItem;
+    final task = widget.allTasksMap[item.taskId];
+
+    return task;
   }
 
   void _configureBoard() {
@@ -87,9 +86,9 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
           }),
         ],
       );
-      boadController.addGroup(group);
+      boardController.addGroup(group);
     }
-    _groupCount = boadController.groupDatas.length;
+    _groupCount = boardController.groupDatas.length;
   }
 
   TaskTextItem _createTextItem(int index, String taskId) =>
@@ -100,7 +99,7 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
       child: AppFlowyBoard(
-        controller: boadController,
+        controller: boardController,
         config: const AppFlowyBoardConfig(boardCornerRadius: 4.0, cardMargin: EdgeInsets.zero, groupHeaderPadding: EdgeInsets.zero),
         boardScrollController: boardScrollController,
         groupConstraints: BoxConstraints(
