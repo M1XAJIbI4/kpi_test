@@ -14,35 +14,60 @@ class _KanbanBoardWidget extends StatefulWidget {
 }
 
 class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
-  final AppFlowyBoardController controller = AppFlowyBoardController(
-    onMoveGroupItem: (str, from, to) {
-      print('on move group item - $str $from $to');
-    },
-    onMoveGroup: (gr1, from, gr2, to) {
-      print('on move group $gr1 $from $gr2 $to');
-    },
-    onMoveGroupItemToGroup: (grFrom, from, grTo, to) {
-      print('on move item to group $grFrom $from $grTo $to');
-    }
-  );
+  late final AppFlowyBoardController boadController;
 
-
-  late AppFlowyBoardScrollController boardController;
-
-  @override
-  void didUpdateWidget(covariant _KanbanBoardWidget oldWidget) {
-    print('FOOBAR DID UPDATE');
-    super.didUpdateWidget(oldWidget);
-  }
+  late AppFlowyBoardScrollController boardScrollController;
+  late final TaskListCubit _taskListCubit;
 
   int _groupCount = 1;
 
   @override
   void initState() {
+    _taskListCubit =  context.read<TaskListCubit>();
+    boadController = AppFlowyBoardController(
+      onMoveGroupItem: _onMoveGroupItem,
+      onMoveGroup: _onMoveGroup,
+      onMoveGroupItemToGroup:_onMoveGroupItemToGroup,
+    );
+  
     _configureBoard();
+    boardScrollController = AppFlowyBoardScrollController();
     super.initState();
-    // _itemWidthNotifier.value = MediaQuery.sizeOf(context).width;
-    boardController = AppFlowyBoardScrollController();
+  }
+
+  void _onMoveGroupItem(String groupKey, int fromIndex, int toIndex) {
+    print('on move group item - $groupKey $fromIndex $toIndex');
+    final task = _getTaskFromGroupByIndex(groupKey, fromIndex);
+    if (task != null) {
+      _taskListCubit.updateTask(
+        taskId: task.indicatorToMoId, 
+        parentId: task.parentId, 
+        newOrder: toIndex + 1
+      );
+    }
+  }
+
+  Task? _getTaskFromGroupByIndex(String key, int index) {
+    try {
+      final groupTasks = widget.sortedTasks[key] ?? [];
+      final result = groupTasks[index];
+      return result;
+    } catch (_) {}
+    return null;
+  } 
+
+  void _onMoveGroup(String gr1, int from, String gr2, int to ) {}
+
+  void _onMoveGroupItemToGroup(String grFrom, int indexFrom, String grTo, int indexTo) {
+    final task = _getTaskFromGroupByIndex(grFrom, indexFrom);
+    print('$grFrom $indexFrom $grTo $indexTo');
+    if (task != null) {
+      _taskListCubit.updateTask(
+        taskId: task.indicatorToMoId, 
+        parentId: grTo, 
+        newOrder: indexTo + 1,
+      );
+    }
   }
 
   void _configureBoard() {
@@ -62,9 +87,9 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
           }),
         ],
       );
-      controller.addGroup(group);
+      boadController.addGroup(group);
     }
-    _groupCount = controller.groupDatas.length;
+    _groupCount = boadController.groupDatas.length;
   }
 
   TaskTextItem _createTextItem(int index, String taskId) =>
@@ -75,30 +100,29 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
       child: AppFlowyBoard(
-        controller: controller,
-        boardScrollController: boardController,
+        controller: boadController,
+        config: const AppFlowyBoardConfig(boardCornerRadius: 4.0, cardMargin: EdgeInsets.zero, groupHeaderPadding: EdgeInsets.zero),
+        boardScrollController: boardScrollController,
         groupConstraints: BoxConstraints(
           maxWidth: min(MediaQuery.sizeOf(context).width / _groupCount * 0.95, 400),
           // minWidth: 200,
         ),
-        headerBuilder: (_, groupData) {
-          groupData.headerData.groupName;
-          return Container(
+        headerBuilder: (_, groupData) => Container(
             width: double.infinity,
             height: 40,
             color: Colors.red,
-          );
-        },
+            child: Text(groupData.headerData.groupName),
+          ),
        
        
-        cardBuilder: (controller, group, groupItem) {
+        cardBuilder: (ctx, group, groupItem) {
           final textItem = groupItem as TaskTextItem;
           final task = widget.allTasksMap[textItem.taskId];
           return AppFlowyGroupCard(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.transparent,
             ),
-            boxConstraints: BoxConstraints(minWidth: 200),
+            boxConstraints: const BoxConstraints(minWidth: 200),
             key: ValueKey(groupItem.id),
             child: task != null
                 ? GestureDetector(
@@ -126,5 +150,5 @@ class TaskTextItem extends AppFlowyGroupItem {
   TaskTextItem(this.index, this.taskId);
 
   @override
-  String get id => index.toString();
+  String get id => '${index.toString()} $taskId';
 }

@@ -31,7 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.green,
         title: const Text('KPI TEST'),
+        
       ),
       body: SafeArea(
         child: BlocBuilder<TaskListCubit, TaskListState>(

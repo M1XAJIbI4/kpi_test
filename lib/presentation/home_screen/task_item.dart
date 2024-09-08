@@ -30,9 +30,10 @@ class TaskItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(task.name),
+                Text(task.name, style: const TextStyle(color: Colors.yellow),),
                 const SizedBox(height: 20),
                 Text(task.order.toString()),
+                Text(task.indicatorToMoId),
               ],
             ),
           ),

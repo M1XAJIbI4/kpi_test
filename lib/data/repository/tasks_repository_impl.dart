@@ -14,9 +14,17 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<List<Task>> getTasks() async {
     final taskMap = await _restSource.getTasks();
-    final result = taskMap.map(
-      (map) => Task.fromMap(map)
-    ).toList();
+    final result = taskMap.map((map) => Task.fromMap(map)).toList();
     return result;
+  }
+
+  @override
+  Future<void> updateTask({
+    required String parentId,
+    required String taskId,
+    required int order,
+  }) async {
+    await _restSource.updateTask(
+        parentId: parentId, taskId: taskId, order: order);
   }
 }

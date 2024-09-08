@@ -15,34 +15,39 @@ class TaskListCubit extends Cubit<TaskListState> {
   Future<void> _initialize() async {
     try {
       final tasks = await _tasksRepository.getTasks();
-      final state = _configureState(tasks);
+      final state = _configureState([...tasks]);
       emit(state);
-
     } catch (e, st) {
       debugPrint('ERROR - $e, \n ST $st');
     }
   }
 
-  Map<String, List<Task>> _configureTaskMap(List<Task> tasks) {
-    var result = <String, List<Task>>{};
+  bool isUpdating = false;
 
-    for (final task in tasks) {
-      final parentId = task.parentId;
-      if (result.containsKey(parentId)) {
-        final currentTasksValue = result[parentId] ?? [];
-        result[parentId] = [task, ...currentTasksValue];
-      } else {
-        result[parentId] = [task];
+  Future<void> updateTask({
+    required String taskId,
+    required String parentId,
+    required int newOrder,
+  }) async {
+    try {
+      final oldTask = state.allTasksMap[taskId];
+      if (oldTask?.parentId != parentId || oldTask?.order != newOrder) {
+        await _tasksRepository.updateTask(
+          parentId: parentId,
+          order: newOrder,
+          taskId: taskId
+        );
+        await _initialize();
       }
+    } catch (e, st) {
+      Future.delayed(const Duration(seconds: 2)).then((_) => _initialize());
+      debugPrint('ERROR - $e, \n ST $st');
     }
-
-    return result;
   }
 
   TaskListState _configureState(List<Task> tasks) {
     final taskMap = <String, Task>{};
     final configuredTaskMap = <String, List<Task>>{};
-
     for (final task in tasks) {
       final parentId = task.parentId;
       taskMap.addAll({task.indicatorToMoId: task});
@@ -59,7 +64,7 @@ class TaskListCubit extends Cubit<TaskListState> {
     }
 
     return TaskListState(
-        allTasksMap: taskMap, configuredTaskMap: configuredTaskMap);
+        allTasksMap: {...taskMap}, configuredTaskMap: {...configuredTaskMap});
   }
 }
 
@@ -72,7 +77,9 @@ class TaskListState {
     required this.configuredTaskMap,
   });
 
-  TaskListState.empty(): allTasksMap = {}, configuredTaskMap = {};
+  TaskListState.empty()
+      : allTasksMap = {},
+        configuredTaskMap = {};
 
   bool get isEmpty => allTasksMap.isEmpty;
 }
