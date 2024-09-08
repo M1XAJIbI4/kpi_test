@@ -17,3 +17,6 @@ class TaskListStateReady extends TaskListState {
 }
 
 class TaskListStateLoading extends TaskListState {}
+
+class TaskListStateError extends TaskListState {}
+ 

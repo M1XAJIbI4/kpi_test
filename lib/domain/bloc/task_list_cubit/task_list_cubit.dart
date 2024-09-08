@@ -47,6 +47,7 @@ class TaskListCubit extends Cubit<TaskListState> {
       }
 
     } catch (e, st) {
+      emit(TaskListStateError());
       Future.delayed(const Duration(seconds: 2)).then((_) => _initialize());
       logger.e('ERROR - $e, \n ST $st');
       emit(currentState);

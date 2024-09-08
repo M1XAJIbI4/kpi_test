@@ -65,11 +65,11 @@ class _HomeScreenState extends State<HomeScreen> {
           SafeArea(
             child: BlocBuilder<TaskListCubit, TaskListState>(
               bloc: _taskListCubit,
-              buildWhen: (_, cur) => cur is! TaskListStateLoading,
+              buildWhen: (prev, cur) => cur is TaskListStateReady && prev is! TaskListStateLoading,
               builder: (ctx, taskListState) {
                 final (allTasksMap, sortedTasksMap) = switch (taskListState) {
-                  TaskListStateLoading _ => (<String, Task>{}, <String, List<Task>>{}),
                   TaskListStateReady ready => (ready.allTasksMap, ready.configuredTaskMap),
+                  _ => (<String, Task>{}, <String, List<Task>>{}),
                 };
                 return AnimatedSwitcher(
                   duration: kThemeAnimationDuration,

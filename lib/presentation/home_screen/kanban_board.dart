@@ -100,17 +100,30 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
       child: AppFlowyBoard(
         controller: boardController,
-        config: const AppFlowyBoardConfig(boardCornerRadius: 4.0, cardMargin: EdgeInsets.zero, groupHeaderPadding: EdgeInsets.zero),
+        config: const AppFlowyBoardConfig(
+          boardCornerRadius: 20.0, 
+          cardMargin: EdgeInsets.zero, 
+          groupHeaderPadding: EdgeInsets.zero,
+          groupBackgroundColor: Colors.black45,
+        ),
         boardScrollController: boardScrollController,
+        
         groupConstraints: BoxConstraints(
           maxWidth: min(MediaQuery.sizeOf(context).width / _groupCount * 0.95, 400),
           // minWidth: 200,
         ),
         headerBuilder: (_, groupData) => Container(
             width: double.infinity,
-            height: 40,
-            color: Colors.red,
-            child: Text(groupData.headerData.groupName),
+            height: 60,
+            color: Colors.black45,
+            child: Center(
+              child: Text(
+                'Группа задач №${groupData.headerData.groupName}',
+                style: const TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            ),
           ),
        
        
