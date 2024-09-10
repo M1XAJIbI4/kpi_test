@@ -27,6 +27,11 @@ class _TaskItemState extends State<TaskItem> {
   }
 
   @override
+  void didUpdateWidget(covariant TaskItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ScalingButton(
       onTap: () {},

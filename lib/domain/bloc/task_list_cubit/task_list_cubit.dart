@@ -39,11 +39,11 @@ class TaskListCubit extends Cubit<TaskListState> {
         emit(TaskListStateLoading());
         await _tasksRepository.updateTask(
             parentId: parentId, order: newOrder, taskId: taskId);
-        emit(currentState);
-        EasyDebounce.debounce('debounce', const Duration(seconds: 2), () {
+            
+        EasyDebounce.debounce('debounce', const Duration(seconds: 1), () {
           _tasksRepository.getTasks();
+          emit(currentState);
         });
-        _tasksRepository.getTasks();
       }
     } catch (e, st) {
       emit(TaskListStateError());

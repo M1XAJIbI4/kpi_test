@@ -96,53 +96,55 @@ class _KanbanBoardWidgetState extends State<_KanbanBoardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-      child: AppFlowyBoard(
-        controller: boardController,
-        config: const AppFlowyBoardConfig(
-          boardCornerRadius: 20.0, 
-          cardMargin: EdgeInsets.zero, 
-          groupHeaderPadding: EdgeInsets.zero,
-          groupBackgroundColor: Colors.black45,
-        ),
-        boardScrollController: boardScrollController,
-        
-        groupConstraints: BoxConstraints(
-          maxWidth: min(MediaQuery.sizeOf(context).width / _groupCount * 0.95, 400),
-          // minWidth: 200,
-        ),
-        headerBuilder: (_, groupData) => Container(
-            width: double.infinity,
-            height: 60,
-            color: Colors.black45,
-            child: Center(
-              child: Text(
-                'Группа задач №${groupData.headerData.groupName}',
-                style: const TextStyle(
-                  fontSize: 18,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+        child: AppFlowyBoard(
+          controller: boardController,
+          config: const AppFlowyBoardConfig(
+            boardCornerRadius: 20.0, 
+            cardMargin: EdgeInsets.zero, 
+            groupHeaderPadding: EdgeInsets.zero,
+            groupBackgroundColor: Colors.black45,
+          ),
+          boardScrollController: boardScrollController,
+          
+          groupConstraints: BoxConstraints(
+            maxWidth: min(MediaQuery.sizeOf(context).width / _groupCount * 0.95, 400),
+            // minWidth: 200,
+          ),
+          headerBuilder: (_, groupData) => Container(
+              width: double.infinity,
+              height: 60,
+              color: Colors.black45,
+              child: Center(
+                child: Text(
+                  'Группа задач №${groupData.headerData.groupName}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
                 ),
               ),
             ),
-          ),
-       
-       
-        cardBuilder: (ctx, group, groupItem) {
-          final textItem = groupItem as TaskTextItem;
-          final task = widget.allTasksMap[textItem.taskId];
-          return AppFlowyGroupCard(
-            decoration: const BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.all(Radius.circular(6.0))
-            ),
-            boxConstraints: const BoxConstraints(minWidth: 200),
-            key: ValueKey(groupItem.id),
-            child: task != null
-                ? TaskItem(task: task)
-                : Text(textItem.index.toString()),
-          );
-        },
-      ));
+         
+         
+          cardBuilder: (ctx, group, groupItem) {
+            final textItem = groupItem as TaskTextItem;
+            final task = widget.allTasksMap[textItem.taskId];
+            return AppFlowyGroupCard(
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.all(Radius.circular(6.0))
+              ),
+              boxConstraints: const BoxConstraints(minWidth: 200),
+              key: ValueKey(groupItem.id),
+              child: task != null
+                  ? TaskItem(task: task)
+                  : Text(textItem.index.toString()),
+            );
+          },
+        )),
+    );
   }
   
   @override
